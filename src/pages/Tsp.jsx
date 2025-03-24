@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { Html, OrbitControls } from "@react-three/drei";
-import { Layout, Form, InputNumber, Button, Typography, Divider, Row, Col } from "antd";
+import { Layout, Form, InputNumber, Button, Typography, Row, Col } from "antd";
 import { FaBuilding } from "react-icons/fa";
 import "antd/dist/reset.css";
-import { Link } from 'react-router-dom'; // Para agregar un botón de regreso
 
-const { Content } = Layout;
+const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
 
 const calculateDistance = (a, b) => {
@@ -18,12 +17,14 @@ const calculateDistance = (a, b) => {
 
 const AnimatedRoute = ({ cities, stepIndex, route }) => {
   const lineRef = useRef();
-  const points = [];
-
-  for (let i = 0; i <= stepIndex && i < route.length; i++) {
-    const city = cities[route[i]];
-    points.push(new THREE.Vector3(city.x, city.y, 0));
-  }
+  const points = useMemo(() => {
+    const tempPoints = [];
+    for (let i = 0; i <= stepIndex && i < route.length; i++) {
+      const city = cities[route[i]];
+      tempPoints.push(new THREE.Vector3(city.x, city.y, 0));
+    }
+    return tempPoints;
+  }, [cities, route, stepIndex]);
 
   useEffect(() => {
     if (lineRef.current) {
@@ -31,12 +32,12 @@ const AnimatedRoute = ({ cities, stepIndex, route }) => {
       lineRef.current.geometry.dispose();
       lineRef.current.geometry = geometry;
     }
-  }, [stepIndex, points]);
+  }, [points]);
 
   return (
     <line ref={lineRef}>
       <bufferGeometry />
-      <lineDashedMaterial color="#e74c3c" dashSize={0.5} gapSize={0.2} linewidth={2} />
+      <lineDashedMaterial color="black" dashSize={0.5} gapSize={0.2} linewidth={2} />
     </line>
   );
 };
@@ -65,7 +66,8 @@ const Tsp = () => {
   };
 
   const calculateExactRoute = () => {
-    const start = Date.now();
+    const start = performance.now();
+
     const distances = cities.map((_, i) =>
       cities.map((_, j) => calculateDistance(cities[i], cities[j]))
     );
@@ -86,14 +88,15 @@ const Tsp = () => {
       }
     });
 
-    const end = Date.now();
+    const end = performance.now();
     setExecutionTime(end - start);
     setRoute(shortestRoute);
     setStepIndex(0);
   };
 
   const calculateApproximateRoute = () => {
-    const start = Date.now();
+    const start = performance.now();
+
     const distances = cities.map((_, i) =>
       cities.map((_, j) => calculateDistance(cities[i], cities[j]))
     );
@@ -114,7 +117,7 @@ const Tsp = () => {
     }
     currentRoute.push(0);
 
-    const end = Date.now();
+    const end = performance.now();
     setExecutionTime(end - start);
     setRoute(currentRoute);
     setStepIndex(0);
@@ -135,12 +138,12 @@ const Tsp = () => {
   }, [stepIndex, route]);
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
-      <Content style={{ padding: '24px', textAlign: 'center' }}>
-        <Title level={2} style={{ color: '#34495e' }}>
-          TSP Solver
-        </Title>
-        <Row gutter={[16, 16]} style={{ marginBottom: '20px' }}>
+    <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
+      <Header style={{ backgroundColor: "#001529", padding: "0 20px" }}>
+        <Title style={{ color: "#fff", margin: 0, lineHeight: "64px" }}>TSP Visualizer</Title>
+      </Header>
+      <Content style={{ padding: "24px" }}>
+        <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
           <Col>
             <Form layout="inline">
               <Form.Item label="Número de ciudades">
@@ -185,17 +188,18 @@ const Tsp = () => {
             </Form>
           </Col>
         </Row>
-        <Row gutter={[16, 16]}>
+
+        <Row>
           <Col span={24}>
             <Canvas
-              style={{ width: '100%', height: '60vh', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+              style={{ width: "100%", height: "60vh", background: "#fff", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}
               camera={{ position: [0, 0, 15], fov: 50 }}
             >
               {cities.map((city, index) => (
                 <Html key={index} position={[city.x, city.y, 0]}>
-                  <div style={{ textAlign: 'center', color: visited[index] ? '#2c3e50' : '#e74c3c' }}>
-                    <FaBuilding size={24} color={visited[index] ? '#2c3e50' : '#e74c3c'} />
-                    <div style={{ fontSize: '12px' }}>{index + 1}</div>
+                  <div style={{ textAlign: "center", color: visited[index] ? "#2c3e50" : "#e74c3c" }}>
+                    <FaBuilding size={24} color={visited[index] ? "#2c3e50" : "#e74c3c"} />
+                    <div style={{ fontSize: "12px" }}>{index + 1}</div>
                   </div>
                 </Html>
               ))}
@@ -206,20 +210,17 @@ const Tsp = () => {
             </Canvas>
           </Col>
         </Row>
-        <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
-          <Col span={24}>
-            <Text strong>Tiempo de ejecución:</Text>
-            <Text>{` ${executionTime} ms`}</Text>
-          </Col>
-        </Row>
-        <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
+
+        <Row style={{ marginTop: "24px" }}>
           <Col>
-            <Link to="/">
-              <Button type="default">Volver al inicio</Button>
-            </Link>
+            <Text strong>Tiempo de ejecución: </Text>
+            <Text>{executionTime.toFixed(2)} ms</Text>
           </Col>
         </Row>
       </Content>
+      <Footer style={{ textAlign: "center" }}>
+        TSP Visualizer ©2024 - Powered by React & Ant Design
+      </Footer>
     </Layout>
   );
 };
