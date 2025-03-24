@@ -103,9 +103,8 @@ const SubsetSum = () => {
   const [activeId, setActiveId] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [difficultyLevel, setDifficultyLevel] = useState('medium'); // easy, medium, hard
+  const [difficultyLevel, setDifficultyLevel] = useState('medium'); 
   
-  // Configure sensors for drag and drop
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: { distance: 10 }
@@ -115,18 +114,15 @@ const SubsetSum = () => {
     })
   );
   
-  // Calculate current sum whenever selected numbers change
   useEffect(() => {
     setCurrentSum(selectedNumbers.reduce((sum, num) => sum + num, 0));
   }, [selectedNumbers]);
   
-  // Generate new problem
   const generateNewProblem = () => {
     let newNumbers;
     let maxNumber;
     let count;
     
-    // Adjust difficulty
     switch (difficultyLevel) {
       case 'easy':
         count = 8;
@@ -136,7 +132,7 @@ const SubsetSum = () => {
         count = 15;
         maxNumber = 50;
         break;
-      default: // medium
+      default: 
         count = 10;
         maxNumber = 30;
         break;
@@ -168,20 +164,16 @@ const SubsetSum = () => {
     const isFromSelected = id.startsWith('selected-');
     const index = parseInt(id.split('-')[1]);
     
-    // If dropped on the "available" container
     if (over.id === 'available') {
       if (isFromSelected) {
-        // Move from selected to available
         const numberToMove = selectedNumbers[index];
         setSelectedNumbers(selectedNumbers.filter((_, i) => i !== index));
         setAvailableNumbers([...availableNumbers, numberToMove]);
       }
     }
     
-    // If dropped on the "selected" container
     if (over.id === 'selected') {
       if (isFromAvailable) {
-        // Move from available to selected
         const numberToMove = availableNumbers[index];
         setAvailableNumbers(availableNumbers.filter((_, i) => i !== index));
         setSelectedNumbers([...selectedNumbers, numberToMove]);
@@ -191,7 +183,6 @@ const SubsetSum = () => {
     setActiveId(null);
   };
   
-  // Check if the solution is correct
   const checkSolution = () => {
     const sum = selectedNumbers.reduce((acc, num) => acc + num, 0);
     const correct = sum === targetSum;
@@ -206,21 +197,20 @@ const SubsetSum = () => {
     }
   };
   
-  // Change difficulty level and generate new problem
+  
   const changeDifficulty = (level) => {
     setDifficultyLevel(level);
     setTimeout(generateNewProblem, 100);
   };
   
-  // Get container styles based on current state
+  
   const getSelectedContainerStyle = () => {
     return {
       backgroundColor: currentSum === targetSum ? '#f6ffed' : currentSum > targetSum ? '#fff2f0' : '#f0f2f5',
       borderColor: currentSum === targetSum ? '#b7eb8f' : currentSum > targetSum ? '#ffccc7' : '#d9d9d9'
     };
   };
-  
-  // Render the component
+
   return (
     <Layout style={{ minHeight: '100vh', background: '#f0f2f5', padding: '24px' }}>
       <Content>
@@ -386,26 +376,6 @@ const SubsetSum = () => {
                   </Col>
                 </Row>
               )}
-            </Card>
-          </Col>
-        </Row>
-        
-        <Row gutter={[16, 16]} justify="center" style={{ marginTop: 24 }}>
-          <Col span={24} md={20} lg={16}>
-            <Card title="Sobre el Problema de Suma de Subconjuntos" bordered={false}>
-              <p>
-                El problema de la suma de subconjuntos es un problema de decisión en informática. 
-                Se trata de determinar si un subconjunto de un conjunto dado de números enteros 
-                puede sumar exactamente a un valor objetivo T.
-              </p>
-              <p>
-                Es un problema NP-completo, lo que significa que no se conoce un algoritmo eficiente
-                que pueda resolverlo para todos los casos en tiempo polinómico.
-              </p>
-              <p>
-                <strong>Instrucciones:</strong> Arrastra números desde "Números Disponibles" a "Tu Selección" 
-                para formar un subconjunto cuya suma sea exactamente igual al valor objetivo.
-              </p>
             </Card>
           </Col>
         </Row>

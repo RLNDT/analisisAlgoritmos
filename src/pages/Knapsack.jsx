@@ -15,23 +15,20 @@ import mochila from '../components/mochila.jpg'
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-// Mock data for items - replace image paths with your actual images
 const items = [
-  { id: 1, name: 'Gold Bar', weight: 12, value: 500, image: gold },
-  { id: 2, name: 'Jewelry', weight: 4, value: 200, image: jewelry },
+  { id: 1, name: 'Barra de Oro', weight: 12, value: 500, image: gold },
+  { id: 2, name: 'Joyas', weight: 4, value: 200, image: jewelry },
   { id: 3, name: 'Laptop', weight: 7, value: 300, image: laptop },
   { id: 4, name: 'Smartphone', weight: 2, value: 150, image: smartphone },
-  { id: 5, name: 'Camera', weight: 5, value: 250, image: camera },
-  { id: 6, name: 'Watch', weight: 1, value: 100, image: watch },
-  { id: 7, name: 'Diamond', weight: 3, value: 400, image: diamond },
-  { id: 8, name: 'Cash', weight: 2, value: 120, image: cash },
+  { id: 5, name: 'Camara', weight: 5, value: 250, image: camera },
+  { id: 6, name: 'Reloj', weight: 1, value: 100, image: watch },
+  { id: 7, name: 'Diamante', weight: 3, value: 400, image: diamond },
+  { id: 8, name: 'Dinero', weight: 2, value: 120, image: cash },
 ];
 
 const Knapsack = () => {
-  // Knapsack capacity
   const capacity = 20;
   
-  // State variables
   const [selectedItems, setSelectedItems] = useState([]);
   const [currentWeight, setCurrentWeight] = useState(0);
   const [currentValue, setCurrentValue] = useState(0);
@@ -39,7 +36,6 @@ const Knapsack = () => {
   const [showResult, setShowResult] = useState(false);
   const [isOptimal, setIsOptimal] = useState(false);
 
-  // Calculate current weight and value whenever selected items change
   useEffect(() => {
     const weight = selectedItems.reduce((sum, item) => sum + item.weight, 0);
     const value = selectedItems.reduce((sum, item) => sum + item.value, 0);
@@ -48,15 +44,12 @@ const Knapsack = () => {
     setCurrentValue(value);
   }, [selectedItems]);
 
-  // Toggle item selection
   const toggleItem = (item) => {
     const isSelected = selectedItems.some(i => i.id === item.id);
     
     if (isSelected) {
-      // Remove item
       setSelectedItems(selectedItems.filter(i => i.id !== item.id));
     } else {
-      // Add item if capacity allows
       const newWeight = currentWeight + item.weight;
       if (newWeight <= capacity) {
         setSelectedItems([...selectedItems, item]);
@@ -64,13 +57,10 @@ const Knapsack = () => {
     }
   };
 
-  // Dynamic programming solution for 0/1 knapsack
   const solveKnapsack = () => {
     const n = items.length;
-    // Create a 2D array for memoization
     const dp = Array(n + 1).fill().map(() => Array(capacity + 1).fill(0));
     
-    // Build table dp[][] in bottom-up manner
     for (let i = 1; i <= n; i++) {
       for (let w = 0; w <= capacity; w++) {
         if (items[i-1].weight <= w) {
@@ -84,7 +74,6 @@ const Knapsack = () => {
       }
     }
     
-    // Find items included in the optimal solution
     const optimalItems = [];
     let w = capacity;
     for (let i = n; i > 0 && w > 0; i--) {
@@ -100,7 +89,6 @@ const Knapsack = () => {
     };
   };
 
-  // Check result
   const checkResult = () => {
     const { optimalItems, maxValue } = solveKnapsack();
     setOptimalSolution({
@@ -109,12 +97,10 @@ const Knapsack = () => {
       weight: optimalItems.reduce((sum, item) => sum + item.weight, 0)
     });
     
-    // Check if user's solution matches the optimal solution
     setIsOptimal(currentValue === maxValue);
     setShowResult(true);
   };
 
-  // Reset selection
   const resetSelection = () => {
     setSelectedItems([]);
     setShowResult(false);
